@@ -1,0 +1,50 @@
+version: "3.8"
+
+services:
+  php:
+    build:
+      context: ./api
+      dockerfile: Dockerfile
+    volumes:
+      - ./api/src:/var/www/html
+    ports:
+      - "8000:8000"
+    environment:
+      UPLOAD_MAX_FILESIZE: 50M
+      POST_MAX_SIZE: 50M
+    depends_on:
+      - mysql
+    networks:
+      - app-network
+
+  mysql:
+    image: mysql:5.7
+    environment:
+      MYSQL_ROOT_PASSWORD: rootpassword
+      MYSQL_DATABASE: mydatabase
+      MYSQL_USER: myuser
+      MYSQL_PASSWORD: mypassword
+    ports:
+      - "3306:3306"
+    volumes:
+      - db_data:/var/lib/mysql
+    networks:
+      - app-network
+
+  react:
+    build:
+      context: ./app
+      dockerfile: Dockerfile
+    ports:
+      - "3000:3000"
+    stdin_open: true
+    tty: true
+    networks:
+      - app-network
+
+networks:
+  app-network:
+    driver: bridge
+
+volumes:
+  db_data:
